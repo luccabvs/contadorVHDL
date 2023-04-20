@@ -10,7 +10,7 @@ end entity;
 
 architecture comportamento of logicaDesvio is
   begin
-    saida <= "01" when JMP OR (JEQ AND igual) OR JSR else
-				 "10" when RET else
+    saida <= "01" when JMP = '1' OR (JEQ = '1' AND igual= '1') OR JSR = '1' else
+				 "10" when RET = '1' else
 				 "00";
 end architecture;

@@ -1,34 +1,34 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
-entity Aula5 is
+entity CPU is
   -- Total de bits das entradas e saidas
   generic ( larguraDados : natural := 13;
-        larguraEnderecos : natural := 9;
-        simulacao : boolean := TRUE -- para gravar na placa, altere de TRUE para FALSE
+        larguraEnderecos : natural := 9
   );
   port   (
-    CLOCK_50 : in std_logic;
-    KEY: in std_logic_vector(3 downto 0);
-	 PC_OUT: out std_logic_vector(larguraEnderecos-1 downto 0);
-    LEDR  : out std_logic_vector(9 downto 0);
-	 EntradaB_ULA: out std_logic_vector(7 downto 0);
-	 Palavra_Controle: out std_logic_vector(11 downto 0)
+    CLOCK : in std_logic;
+	 Data_IN : in std_logic_vector(7 downto 0);
+	 Instrucao_IN: in std_logic_vector(12 downto 0);
+	 wr : out std_logic;
+	 rd : out std_logic;
+	 ROM_Address : out std_logic_vector(8 downto 0);
+	 Data_Address : out std_logic_vector(8 downto 0);
+	 Data_OUT : out std_logic_vector(7 downto 0)
   );
 end entity;
 
 
-architecture arquitetura of Aula5 is
+architecture arquitetura of CPU is
 
 -- Faltam alguns sinais:
   signal MUX_B_ULA : std_logic_vector (7 downto 0);
-  signal saida_dados_RAM : std_logic_vector (7 downto 0);
   signal REG1_ULA_A : std_logic_vector (7 downto 0);
   signal Saida_ULA : std_logic_vector (7 downto 0);
   signal Sinais_Controle : std_logic_vector (11 downto 0);
   signal Endereco_ROM : std_logic_vector (8 downto 0);
+  signal DataIN : std_logic_vector(7 downto 0);
   signal proxPC : std_logic_vector (8 downto 0);
-  signal Chave_Operacao_ULA : std_logic;
   signal CLK : std_logic;
   signal SelMUX : std_logic;
   signal Habilita_A : std_logic;
@@ -52,21 +52,17 @@ begin
 
 -- Instanciando os componentes:
 
--- Para simular, fica mais simples tirar o edgeDetector
-gravar:  if simulacao generate
-CLK <= KEY(0);
-else generate
-detectorSub0: work.edgeDetector(bordaSubida)
-        port map (clk => CLOCK_50, entrada => (not KEY(0)), saida => CLK);
-end generate;
+CLK <= CLOCK;
+Instrucao <= Instrucao_IN;
 
 -- O port map completo do MUX.
 MUX1 :  entity work.muxGenerico2x1  generic map (larguraDados => 8)
-        port map(entradaA_MUX => saida_dados_RAM,
+        port map(entradaA_MUX => DataIN,
                  entradaB_MUX =>  Instrucao(7 downto 0),
                  seletor_MUX => SelMUX,
                  saida_MUX => MUX_B_ULA);
-					  
+					 
+-- O port map completo do MUX de Desvio. 
 MUX_DESVIO :  entity work.muxGenericoNx1  generic map (larguraEntrada => 9, larguraSelecao => 2)
         port map( entradaA_MUX => proxPC,
 						entradaB_MUX => Instrucao(8 downto 0),
@@ -87,6 +83,7 @@ PC : entity work.registradorGenerico   generic map (larguraDados => larguraEnder
 			 CLK => CLK, 
 			 RST => '0');
 
+-- O port map completo do Incrementa 1 no PC.
 incrementaPC :  entity work.somaConstante  generic map (larguraDados => larguraEnderecos, constante => 1)
         port map( entrada => Endereco_ROM, 
 		  saida => proxPC);
@@ -100,31 +97,36 @@ ULA1 : entity work.ULASomaSub  generic map(larguraDados => 8)
 			 saida_flipFlop => ULA_flag,
 			 seletor => Operacao_ULA);
 
--- Falta acertar o conteudo da ROM (no arquivo memoriaROM.vhd)
-ROM1 : entity work.memoriaROM   generic map (dataWidth => 13, addrWidth => 9)
-          port map (Endereco => Endereco_ROM, Dado => Instrucao);
-
 DEC : entity work.decoderInstru
-		port map (opcode => Instrucao(12 downto 9), saida => Sinais_Controle);
+		port map (opcode => Instrucao(12 downto 9), 
+		saida => Sinais_Controle);
 	
 DESVIO : entity work.logicaDesvio
-			port map (igual => flagZero, JMP => JMP, JEQ => JEQ, JSR => JSR, RET => RET, saida => sel_desvio);
+			port map (igual => flagZero, 
+			JMP => JMP, 
+			JEQ => JEQ, 
+			JSR => JSR, 
+			RET => RET, 
+			saida => sel_desvio);
 	
 REG_FLIPFLOP: entity work.flipFlop
-				port map (DIN => ULA_flag, DOUT => flagZero, ENABLE => habFlag, CLK => CLK, RST => '0');					
+				port map (DIN => ULA_flag, 
+				DOUT => flagZero, 
+				ENABLE => habFlag, 
+				CLK => CLK, 
+				RST => '0');					
 				
 END_RET : entity work.registradorGenerico   generic map (larguraDados => 9)
-          port map (DIN => proxPC, DOUT => linha_retorno, ENABLE => habEscritaRetorno, CLK => CLK, RST => '0');
-				
-RAM : entity work.memoriaRAM
-		generic map (dataWidth => 8, addrWidth => 8)
-		port map (addr => Instrucao(7 downto 0), 
-		we => habEscritaMEM, 
-		re => habLeituraMEM, 
-		habilita => Instrucao(8),
-		clk => clk,
-		dado_in => REG1_ULA_A,
-		dado_out => saida_dados_RAM);
+          port map (DIN => proxPC, 
+			 DOUT => linha_retorno, 
+			 ENABLE => habEscritaRetorno, 
+			 CLK => CLK, 
+			 RST => '0');
+
+ROM_Address <= Endereco_ROM;
+DataIn <= Data_IN;
+Data_OUT <= REG1_ULA_A;
+Data_Address <= Instrucao(8 downto 0);
 
 habEscritaRetorno <= Sinais_Controle(11);
 JMP <= Sinais_Controle(10);
@@ -137,25 +139,5 @@ Operacao_ULA <= Sinais_Controle(4 downto 3);
 habFlag <= Sinais_Controle(2);
 habLeituraMEM <= Sinais_Controle(1);
 habEscritaMEM <= Sinais_Controle(0);
-
-
--- I/O
--- chavesY_MUX_A <= SW(3 downto 0);
--- chavesX_ULA_B <= SW(9 downto 6);
-
--- A ligacao dos LEDs:
--- LEDR (9) <= SelMUX;
--- LEDR (8) <= Habilita_A;
--- LEDR (7) <= Reset_A;
--- LEDR (6) <= Operacao_ULA;
--- LEDR (5) <= '0';    -- Apagado.
--- LEDR (4) <= '0';    -- Apagado.
--- LEDR (3 downto 0) <= REG1_ULA_A;
-
-PC_OUT <= Endereco_ROM;
-LEDR(7 downto 0) <= Saida_ULA;
-LEDR(9 downto 8) <= Operacao_ULA;
-EntradaB_ULA <= MUX_B_ULA;
-Palavra_Controle <= Sinais_Controle;
 
 end architecture;
