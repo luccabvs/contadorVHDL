@@ -5,7 +5,7 @@ entity contador is
   -- Total de bits das entradas e saidas
   generic ( larguraDados : natural := 8;
         larguraEnderecos : natural := 9;
-        simulacao : boolean := FALSE -- para gravar na placa, altere de TRUE para FALSE
+        simulacao : boolean := TRUE -- para gravar na placa, altere de TRUE para FALSE
   );
   port   (
     CLOCK_50 : in std_logic;
@@ -73,23 +73,31 @@ architecture arquitetura of contador is
 	signal saidaFPGARTS: std_logic;
 	signal saidaDetK0: std_logic;
 	signal saidaDetK1: std_logic;
+	signal saidaDetR: std_logic;
 	signal limpaK0: std_logic;
 	signal limpaK1: std_logic;
+	signal limpaR: std_logic;
+	signal saidaFFK0: std_logic;
+	signal saidaFFK1: std_logic;
+	signal saidaFFR: std_logic;
 
 
 begin
 gravar:  if simulacao generate
-CLK <= KEY(0);
+CLK <= CLOCK_50;
 else generate
 detectorSub0: work.edgeDetector(bordaSubida)
-        port map (CLK => CLOCK_50, entrada => (not KEY(0)), saida => CLK);
+        port map (CLK => CLOCK_50,
+		  entrada => (not KEY(0)),
+		  saida => CLK);
 end generate;			 
 
 
 ROM1 : entity work.memoriaROM   generic map (dataWidth => 13, addrWidth => 9)
-          port map (Endereco => Entrada_ROM, Dado => Saida_ROM);
+          port map (Endereco => Entrada_ROM,
+			 Dado => Saida_ROM);
 
-processador : entity work.CPU port map (
+CPU : entity work.CPU port map (
 					CLOCK => CLK,
 					Data_IN => Dado_Lido,
 					Instrucao_IN => Saida_ROM,
@@ -99,7 +107,8 @@ processador : entity work.CPU port map (
 					Data_Address => Data_Address,
 					Data_OUT => Dado_Escrito
 					);
-										
+					
+													
 RAM : entity work.memoriaRAM
 		generic map (dataWidth => 8, addrWidth => 6)
 		port map (addr => Data_Address(5 downto 0), 
@@ -107,14 +116,14 @@ RAM : entity work.memoriaRAM
 		re => habLeituraMEM, 
 		habilita => Saida_Decoder1(0),
 		CLK => CLK,
-		dado_in => Dado_Lido,
-		dado_out => Dado_Escrito
+		dado_in => Dado_Escrito,
+		dado_out => Dado_Lido
 		);
 		
 --Buffer3State :  entity work.buffer_3_state_8portas
 --        port map(entrada => sinalLocal, habilita =>  sinalLocal, saida => sinalLocal);
 		  
-REG8 : entity work.registradorGenerico   generic map (larguraDados => larguraDados)
+REG8 : entity work.registradorGenerico   generic map (larguraDados => 8)
           port map (
 			 DIN => Dado_Escrito, 
 			 DOUT => saidaREG8, 
@@ -247,12 +256,12 @@ SW9_TS: entity work.buffer_3_state_8portas
 		  saida => Dado_Lido);
 		 
 K0_TS: entity work.buffer_3_state_8portas
-        port map(entrada => "0000000" & Saida_FF1,
+        port map(entrada => "0000000" & saidaFFK0,
 		  habilita =>  habK0TS,
 		  saida => Dado_Lido);
 		 
 K1_TS: entity work.buffer_3_state_8portas
-        port map(entrada => "0000000" & Saida_FF2,
+        port map(entrada => "0000000" & saidaFFK1,
 		  habilita =>  habK1TS,
 		  saida => Dado_Lido);
 		 
@@ -272,10 +281,32 @@ FPGAR_TS: entity work.buffer_3_state_8portas
 		  saida => Dado_Lido);
 		  
 detectorKEY0: work.edgeDetector(bordaSubida)
-        port map (clk => CLOCK_50, entrada => (not KEY(0)), saida => saidaDetK0);
+        port map (clk => CLOCK_50,
+		  entrada => (not KEY(0)),
+		  saida => saidaDetK0);
 
 detectorKEY1: work.edgeDetector(bordaSubida)
-        port map (clk => CLOCK_50, entrada => (not KEY(1)), saida => saidaDetK1);
+        port map (clk => CLOCK_50,
+		  entrada => (not KEY(1)),
+		  saida => saidaDetK1);
+		  
+FFK0: entity work.FlipFlop port map (DIN => '1',
+												DOUT => saidaFFK0,
+												ENABLE => '1',
+											   CLK => saidaDetK0,
+												RST => limpaK0);
+												
+FFK1: entity work.FlipFlop port map (DIN => '1',
+												DOUT => saidaFFK1,
+												ENABLE => '1',
+											   CLK => saidaDetK1,
+												RST => limpaK1);
+												
+FFRESET: entity work.FlipFlop port map (DIN => '1',
+												DOUT => saidaFFR,
+												ENABLE => '1',
+											   CLK => saidaDetR,
+												RST => limpaR);
 		  
 
 habReg8 <= saida_decoder1(4) and habEscritaMEM and saida_decoder2(0) and (not Data_Address(5));		

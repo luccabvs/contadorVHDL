@@ -10,11 +10,12 @@ entity CPU is
     CLOCK : in std_logic;
 	 Data_IN : in std_logic_vector(7 downto 0);
 	 Instrucao_IN: in std_logic_vector(12 downto 0);
-	 wr : out std_logic;
-	 rd : out std_logic;
 	 ROM_Address : out std_logic_vector(8 downto 0);
 	 Data_Address : out std_logic_vector(8 downto 0);
-	 Data_OUT : out std_logic_vector(7 downto 0)
+	 Data_OUT : out std_logic_vector(7 downto 0); 
+	 Wr : out std_logic;
+	 Rd : out std_logic
+	 
   );
 end entity;
 
@@ -73,7 +74,11 @@ MUX_DESVIO :  entity work.muxGenericoNx1  generic map (larguraEntrada => 9, larg
 
 -- O port map completo do Acumulador.
 REGA : entity work.registradorGenerico   generic map (larguraDados => 8)
-          port map (DIN => Saida_ULA, DOUT => REG1_ULA_A, ENABLE => Habilita_A, CLK => CLK, RST => '0');
+          port map (DIN => Saida_ULA, 
+			 DOUT => REG1_ULA_A, 
+			 ENABLE => Habilita_A, 
+			 CLK => CLK, 
+			 RST => '0');
 
 -- O port map completo do Program Counter.
 PC : entity work.registradorGenerico   generic map (larguraDados => larguraEnderecos)
@@ -123,11 +128,13 @@ END_RET : entity work.registradorGenerico   generic map (larguraDados => 9)
 			 CLK => CLK, 
 			 RST => '0');
 
+			 
+Wr <= Sinais_Controle(0);
+Rd <= Sinais_Controle(1);
 ROM_Address <= Endereco_ROM;
 DataIn <= Data_IN;
 Data_OUT <= REG1_ULA_A;
 Data_Address <= Instrucao(8 downto 0);
-
 habEscritaRetorno <= Sinais_Controle(11);
 JMP <= Sinais_Controle(10);
 RET <= Sinais_Controle(9);
@@ -137,7 +144,6 @@ selMUX <= Sinais_Controle(6);
 Habilita_A <= Sinais_Controle(5);
 Operacao_ULA <= Sinais_Controle(4 downto 3);
 habFlag <= Sinais_Controle(2);
-habLeituraMEM <= Sinais_Controle(1);
-habEscritaMEM <= Sinais_Controle(0);
+
 
 end architecture;
