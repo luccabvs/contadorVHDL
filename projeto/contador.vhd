@@ -12,7 +12,8 @@ entity contador is
     KEY: in std_logic_vector(3 downto 0);
 	 SW: in std_logic_vector(9 downto 0);
     LEDR  : out std_logic_vector(9 downto 0);
-	 HEX0, HEX1, HEX2, HEX3, HEX4, HEX5: out std_logic_vector(6 downto 0)
+	 HEX0, HEX1, HEX2, HEX3, HEX4, HEX5: out std_logic_vector(6 downto 0);
+	 FPGA_RESET: in std_logic
   );
 end entity;
 
@@ -54,6 +55,26 @@ architecture arquitetura of contador is
 	signal display_3: std_logic_vector(6 downto 0);
 	signal display_4: std_logic_vector(6 downto 0);
 	signal display_5: std_logic_vector(6 downto 0);
+	signal habSWTS: std_logic;
+	signal habSW8TS: std_logic;
+	signal habSW9TS: std_logic;
+	signal habK0TS: std_logic;
+	signal habK1TS: std_logic;
+	signal habK2TS: std_logic;
+	signal habK3TS: std_logic;
+	signal habFPGARTS: std_logic;
+	signal saidaSWTS: std_logic_vector(7 downto 0);
+	signal saidaSW8TS: std_logic;
+	signal saidaSW9TS: std_logic;
+	signal saidaK0TS: std_logic;
+	signal saidaK1TS: std_logic;
+	signal saidaK2TS: std_logic;
+	signal saidaK3TS: std_logic;
+	signal saidaFPGARTS: std_logic;
+	signal saidaDetK0: std_logic;
+	signal saidaDetK1: std_logic;
+	signal limpaK0: std_logic;
+	signal limpaK1: std_logic;
 
 
 begin
@@ -148,15 +169,15 @@ FF1: entity work.FlipFlop port map (
 				DIN => Dado_Escrito(0),
 				DOUT => Saida_FF1,
 				ENABLE => habFF1,
-				CLK => CLK,
-				RST => '0');
+				CLK => saidaDetK0,
+				RST => limpaK0);
 				
 FF2: entity work.FlipFlop port map (
 				DIN => Dado_Escrito(0),
 				DOUT => Saida_FF2,
 				ENABLE => habFF2,
-				CLK => CLK,
-				RST => '0');
+				CLK => saidaDetK1,
+				RST => limpaK1);
 
 
 DEC1 :  entity work.decoder3x8
@@ -208,8 +229,54 @@ display5 :  entity work.conversorHex7Seg
                  negativo => '0',
                  overFlow =>  '0',
                  saida7seg => display_5);
+					  
+					  
+SW_TS: entity work.buffer_3_state_8portas
+        port map(entrada => SW(7 downto 0), 
+		  habilita =>  habSWTS,
+		  saida => Dado_Lido);
+		
+SW8_TS: entity work.buffer_3_state_8portas
+        port map(entrada => "0000000" & SW(8),
+		  habilita =>  habSW8TS,
+		  saida => Dado_Lido);
+		
+SW9_TS: entity work.buffer_3_state_8portas
+        port map(entrada => "0000000" & SW(9),
+		  habilita =>  habSW9TS,
+		  saida => Dado_Lido);
+		 
+K0_TS: entity work.buffer_3_state_8portas
+        port map(entrada => "0000000" & Saida_FF1,
+		  habilita =>  habK0TS,
+		  saida => Dado_Lido);
+		 
+K1_TS: entity work.buffer_3_state_8portas
+        port map(entrada => "0000000" & Saida_FF2,
+		  habilita =>  habK1TS,
+		  saida => Dado_Lido);
+		 
+K2_TS: entity work.buffer_3_state_8portas
+        port map(entrada => "0000000" & KEY(2),
+		  habilita =>  habK2TS,
+		  saida => Dado_Lido);
+		  
+K3_TS: entity work.buffer_3_state_8portas
+        port map(entrada => "0000000" & KEY(3),
+		  habilita =>  habK3TS,
+		  saida => Dado_Lido);
+		  
+FPGAR_TS: entity work.buffer_3_state_8portas
+        port map(entrada => "0000000" & FPGA_RESET,
+		  habilita =>  habFPGARTS,
+		  saida => Dado_Lido);
+		  
+detectorKEY0: work.edgeDetector(bordaSubida)
+        port map (clk => CLOCK_50, entrada => (not KEY(0)), saida => saidaDetK0);
 
-
+detectorKEY1: work.edgeDetector(bordaSubida)
+        port map (clk => CLOCK_50, entrada => (not KEY(1)), saida => saidaDetK1);
+		  
 
 habReg8 <= saida_decoder1(4) and habEscritaMEM and saida_decoder2(0) and (not Data_Address(5));		
 habFF1  <= saida_decoder1(4) and habEscritaMEM and saida_decoder2(2) and (not Data_Address(5));	 
@@ -228,6 +295,22 @@ habReg4_2 <= saida_decoder2(2) and Data_Address(5) and saida_decoder1(4) and hab
 habReg4_3 <= saida_decoder2(3) and Data_Address(5) and saida_decoder1(4) and habEscritaMEM;
 habReg4_4 <= saida_decoder2(4) and Data_Address(5) and saida_decoder1(4) and habEscritaMEM;
 habReg4_5 <= saida_decoder2(5) and Data_Address(5) and saida_decoder1(4) and habEscritaMEM;
+
+habSWTS  <= habLeituraMEM and (not Data_Address(5)) and saida_decoder2(0) and saida_decoder1(5);
+habSW8TS <= habLeituraMEM and (not Data_Address(5)) and saida_decoder2(1) and saida_decoder1(5);
+habSW9TS <= habLeituraMEM and (not Data_Address(5)) and saida_decoder2(2) and saida_decoder1(5);
+habK0TS <= habLeituraMEM and Data_Address(5) and saida_decoder2(0) and saida_decoder1(5);
+habK1TS <= habLeituraMEM and Data_Address(5) and saida_decoder2(1) and saida_decoder1(5);
+habK2TS <= habLeituraMEM and Data_Address(5) and saida_decoder2(2) and saida_decoder1(5);
+habK3TS <= habLeituraMEM and Data_Address(5) and saida_decoder2(3) and saida_decoder1(5);
+habFPGARTS <= habLeituraMEM and Data_Address(5) and saida_decoder2(4) and saida_decoder1(5);
+
+limpaK0 <= habEscritaMEM and Data_Address(8) and Data_Address(7) and Data_Address(6) and Data_Address(5) and Data_Address(4) and Data_Address(3) and Data_Address(2)
+                  and Data_Address(1) and Data_Address(0);
+						
+limpaK1 <= habEscritaMEM and Data_Address(8) and Data_Address(7) and Data_Address(6) and Data_Address(5) and Data_Address(4) and Data_Address(3) and Data_Address(2)
+                  and Data_Address(1) and (not Data_Address(0));
+
 			 
 LEDR (9) <= saida_FF1;
 LEDR (8) <= saida_FF2;
