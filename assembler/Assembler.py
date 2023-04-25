@@ -116,7 +116,7 @@ with open(outputBIN, "w+") as f:  #Abre o destino BIN
         #     continue
                 
         if '!' in line or line == '\n':
-            instrucaoLine = "NOP"
+            instrucaoLine = "NOP "
 
         if '@' in instrucaoLine: #Se encontrar o caractere arroba '@' 
             instrucaoLine = transformaLabel(instrucaoLine)
@@ -130,7 +130,7 @@ with open(outputBIN, "w+") as f:  #Abre o destino BIN
             instrucaoLine = instrucaoLine + "& " + "\'0\' & " + "x\"00" #Acrescenta o valor x"00". Ex(RET): x"A" x"00"
             
         
-        line = 'tmp(' + str(cont) + ') := ' + instrucaoLine + ';\t-- ' + comentarioLine + '\n'  #Formata para o arquivo BIN
+        line = 'tmp(' + str(cont) + ') := ' + instrucaoLine + '";\t-- ' + comentarioLine + '\n'  #Formata para o arquivo BIN
                                                                                                     #Entrada => 1. JSR @14 #comentario1
                                                                                                     #Saída =>   1. tmp(0) := x"90E";	-- JSR @14 	#comentario1
         cont+=1 #Incrementa a variável de contagem, utilizada para incrementar as posições de memória no VHDL

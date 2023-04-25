@@ -30,11 +30,6 @@ STA @62 --Armazena o valor 10 em MEM[62]
 LDI $1 --Carregado 10 no Acumulador
 STA @63 --Armazena o valor 1 em MEM[63]
 !START
-LDA @509 --Carrega o valor da leitura do FPGA RESET
-CEQ @63 --Compara o valor do acumulador com 1
-JEQ @SETUP --Se for igual a 1, chama a função SETUP
-LDA @510 --Carrega o valor da leitura do KEY1
-CEQ @63 --Compara o valor do acumulador com 1
 LDA @511 --Carrega o valor da leitura do KEY0
 CEQ @63 --Compara o valor do acumulador com 1
 JEQ @INCUNIDADE --Se for igual a 1, chama a função INCUNIDADE
