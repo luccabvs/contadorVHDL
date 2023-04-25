@@ -6,12 +6,6 @@ STA @2 --Valor 0 em centena
 STA @3 --Valor 0 em unidade de milhar
 STA @4 --Valor 0 em dezena de milhar
 STA @5 --Valor 0 em centena de milhar
-STA @6 --Valor 0 em limite de unidade
-STA @7 --Valor 0 em limite de dezena
-STA @8 --Valor 0 em limite de centena
-STA @9 --Valor 0 em limite de unidade de milhar
-STA @10 --Valor 0 em limite de dezena de milhar
-STA @11 --Valor 0 em limite de centena de milhar
 STA @256 --Valor 0 no conjunto de 8 LEDs
 STA @257 --Valor 0 no LEDR8
 STA @258 --Valor 0 no LEDR9
@@ -24,11 +18,11 @@ STA @293 --Valor 0 no HEX5
 STA @510 --Limpa leitura KEY1
 STA @511 --Limpa leitura KEY0
 STA @509 --Limpa leitura FPGA RESET
-STA @61 --Armazena o valor 0 em MEM[61]
+STA @6 --Armazena o valor 0 em MEM[61]
 LDI $10 --Carrega 10 no Acumulador
-STA @62 --Armazena o valor 10 em MEM[62]
+STA @8 --Armazena o valor 10 em MEM[62]
 LDI $1 --Carregado 10 no Acumulador
-STA @63 --Armazena o valor 1 em MEM[63]
+STA @7 --Armazena o valor 1 em MEM[63]
 !START
 LDA @511 --Carrega o valor da leitura do KEY0
 CEQ @63 --Compara o valor do acumulador com 1
@@ -98,6 +92,3 @@ LDA @4 --Carrega o valor das dezenas de milhar
 STA @292 --Armazena o valor do acumulador em HEX4
 LDA @5 --Carrega o valor das centenas de milhar
 STA @293 --Armazena o valor do acumulador em HEX5
-
-
-
