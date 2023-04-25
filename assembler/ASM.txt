@@ -25,12 +25,20 @@ STA @510 --Limpa leitura KEY1
 STA @511 --Limpa leitura KEY0
 STA @509 --Limpa leitura FPGA RESET
 STA @61 --Armazena o valor 0 em MEM[61]
-LDI $1 --Carrega 1 no Acumulador
-STA @62 --Armazena o valor 1 em MEM[62]
-LDI $10 --Carregado 10 no Acumulador
+LDI $10 --Carrega 10 no Acumulador
+STA @62 --Armazena o valor 10 em MEM[62]
+LDI $1 --Carregado 10 no Acumulador
 STA @63 --Armazena o valor 1 em MEM[63]
-JSR @INCUNIDADE --Chama a função INCUNIDADE
-JSR @DISPLAY --Chama a função DISPLAY
+!START
+LDA @509 --Carrega o valor da leitura do FPGA RESET
+CEQ @63 --Compara o valor do acumulador com 1
+JEQ @SETUP --Se for igual a 1, chama a função SETUP
+LDA @510 --Carrega o valor da leitura do KEY1
+CEQ @63 --Compara o valor do acumulador com 1
+LDA @511 --Carrega o valor da leitura do KEY0
+CEQ @63 --Compara o valor do acumulador com 1
+JEQ @INCUNIDADE --Se for igual a 1, chama a função INCUNIDADE
+JMP @START --Retorna ao início do programa
 !INCUNIDADE
 STA @511 --Limpa leitura KEY0
 LDA @0 --Carrega o valor das unidades
@@ -38,7 +46,7 @@ SOMA @63 --Soma o valor do acumulador com 1
 CEQ @62 --Compara o valor do acumulador com 10
 JEQ @INCDEZENA --Se for igual a 10, incrementa a dezena
 STA @0 --Armazena o valor do acumulador em HEX0
-RET
+JMP @DISPLAY --Exibe valor
 !INCDEZENA
 LDA @61 --Carrega o valor de 0 no acumulador
 STA @0 --Zera as unidades
@@ -47,7 +55,7 @@ SOMA @63 --Soma o valor do acumulador com 1
 CEQ @62 --Compara o valor do acumulador com 10
 JEQ @INCCENTENA --Se for igual a 10, incrementa a centena
 STA @1 --Armazena o valor do acumulador em HEX1
-RET
+JMP @DISPLAY --Exibe valor
 !INCCENTENA
 LDA @61 --Carrega o valor de 0 no acumulador
 STA @1 --Zera as dezenas
@@ -56,7 +64,7 @@ SOMA @63 --Soma o valor do acumulador com 1
 CEQ @62 --Compara o valor do acumulador com 10
 JEQ @INCUMILHAR --Se for igual a 10, incrementa a unidade de milhar
 STA @2 --Armazena o valor do acumulador em HEX2
-RET
+JMP @DISPLAY --Exibe valor
 !INCUMILHAR
 LDA @61 --Carrega o valor de 0 no acumulador
 STA @2 --Zera as centenas
@@ -65,7 +73,7 @@ SOMA @63 --Soma o valor do acumulador com 1
 CEQ @62 --Compara o valor do acumulador com 10
 JEQ @INCDEZMILHAR --Se for igual a 10, incrementa a dezena de milhar
 STA @3 --Armazena o valor do acumulador em HEX3
-RET
+JMP @DISPLAY --Exibe valor
 !INCDEZMILHAR
 LDA @61 --Carrega o valor de 0 no acumulador
 STA @3 --Zera as unidades de milhar
@@ -74,16 +82,14 @@ SOMA @63 --Soma o valor do acumulador com 1
 CEQ @62 --Compara o valor do acumulador com 10
 JEQ @INCCENTMILHAR --Se for igual a 10, incrementa a centena de milhar
 STA @4 --Armazena o valor do acumulador em HEX4
-RET
+JMP @DISPLAY --Exibe valor
 !INCCENTMILHAR
 LDA @61 --Carrega o valor de 0 no acumulador
 STA @4 --Zera as dezenas de milhar
 LDA @5 --Carrega o valor das centenas de milhar
 SOMA @63 --Soma o valor do acumulador com 1
-CEQ @62 --Compara o valor do acumulador com 10
-JEQ @LIMITE --Se for igual a 10, incrementa a centena de milhar
 STA @5 --Armazena o valor do acumulador em HEX5
-RET
+JMP @DISPLAY --Exibe valor
 !DISPLAY
 LDA @0 --Carrega o valor das unidades
 STA @288 --Armazena o valor do acumulador em HEX0
@@ -97,6 +103,6 @@ LDA @4 --Carrega o valor das dezenas de milhar
 STA @292 --Armazena o valor do acumulador em HEX4
 LDA @5 --Carrega o valor das centenas de milhar
 STA @293 --Armazena o valor do acumulador em HEX5
-RET
+
 
 
