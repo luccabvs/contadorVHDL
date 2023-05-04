@@ -63,14 +63,6 @@ architecture arquitetura of relogio is
 	signal habK2TS: std_logic;
 	signal habK3TS: std_logic;
 	signal habFPGARTS: std_logic;
-	signal saidaSWTS: std_logic_vector(7 downto 0);
-	signal saidaSW8TS: std_logic;
-	signal saidaSW9TS: std_logic;
-	signal saidaK0TS: std_logic;
-	signal saidaK1TS: std_logic;
-	signal saidaK2TS: std_logic;
-	signal saidaK3TS: std_logic;
-	signal saidaFPGARTS: std_logic;
 	signal saidaDetK0: std_logic;
 	signal saidaDetK1: std_logic;
 	signal saidaDetR: std_logic;
@@ -174,16 +166,15 @@ FF1: entity work.FlipFlop port map (
 				DIN => Dado_Escrito(0),
 				DOUT => Saida_FF1,
 				ENABLE => habFF1,
-				CLK => saidaDetK0,
-				RST => limpaK0);
+				CLK => CLK,
+				RST => '0');
 				
 FF2: entity work.FlipFlop port map (
 				DIN => Dado_Escrito(0),
 				DOUT => Saida_FF2,
 				ENABLE => habFF2,
-				CLK => saidaDetK1,
-				RST => limpaK1);
-
+				CLK => CLK,
+				RST => '0');
 
 DEC1 :  entity work.decoder3x8
         port map( entrada => Data_Address(8 downto 6),
@@ -237,7 +228,7 @@ display5 :  entity work.conversorHex7Seg
 					  
 					  
 SW_TS: entity work.buffer_3_state_8portas
-        port map(entrada => SW(7 downto 0), 
+        port map(entrada => "0000" & SW(3 downto 0), 
 		  habilita =>  habSWTS,
 		  saida => Dado_Lido);
 		
@@ -272,7 +263,7 @@ K3_TS: entity work.buffer_3_state_8portas
 		  saida => Dado_Lido);
 		  
 FPGAR_TS: entity work.buffer_3_state_8portas
-        port map(entrada => "0000000" & FPGA_RESET,
+        port map(entrada => "0000000" & saidaFFR,
 		  habilita =>  habFPGARTS,
 		  saida => Dado_Lido);
 		  
