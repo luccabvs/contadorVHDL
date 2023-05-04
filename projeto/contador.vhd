@@ -63,14 +63,6 @@ architecture arquitetura of contador is
 	signal habK2TS: std_logic;
 	signal habK3TS: std_logic;
 	signal habFPGARTS: std_logic;
-	signal saidaSWTS: std_logic_vector(7 downto 0);
-	signal saidaSW8TS: std_logic;
-	signal saidaSW9TS: std_logic;
-	signal saidaK0TS: std_logic;
-	signal saidaK1TS: std_logic;
-	signal saidaK2TS: std_logic;
-	signal saidaK3TS: std_logic;
-	signal saidaFPGARTS: std_logic;
 	signal saidaDetK0: std_logic;
 	signal saidaDetK1: std_logic;
 	signal saidaDetR: std_logic;
@@ -125,7 +117,7 @@ RAM : entity work.memoriaRAM
 		  
 REG8 : entity work.registradorGenerico   generic map (larguraDados => 8)
           port map (
-			 DIN => Dado_Escrito, 
+			 DIN => Dado_Escrito(7 downto 0), 
 			 DOUT => saidaREG8, 
 			 ENABLE => habReg8, 
 			 CLK => CLK, 
@@ -178,15 +170,15 @@ FF1: entity work.FlipFlop port map (
 				DIN => Dado_Escrito(0),
 				DOUT => Saida_FF1,
 				ENABLE => habFF1,
-				CLK => saidaDetK0,
-				RST => limpaK0);
+				CLK => CLK,
+				RST => '0');
 				
 FF2: entity work.FlipFlop port map (
 				DIN => Dado_Escrito(0),
 				DOUT => Saida_FF2,
 				ENABLE => habFF2,
-				CLK => saidaDetK1,
-				RST => limpaK1);
+				CLK => CLK,
+				RST => '0');
 
 
 DEC1 :  entity work.decoder3x8
@@ -241,7 +233,7 @@ display5 :  entity work.conversorHex7Seg
 					  
 					  
 SW_TS: entity work.buffer_3_state_8portas
-        port map(entrada => SW(7 downto 0), 
+        port map(entrada => "0000" & SW(3 downto 0), 
 		  habilita =>  habSWTS,
 		  saida => Dado_Lido);
 		
@@ -276,7 +268,7 @@ K3_TS: entity work.buffer_3_state_8portas
 		  saida => Dado_Lido);
 		  
 FPGAR_TS: entity work.buffer_3_state_8portas
-        port map(entrada => "0000000" & FPGA_RESET,
+        port map(entrada => "0000000" & saidaFFR,
 		  habilita =>  habFPGARTS,
 		  saida => Dado_Lido);
 		  
@@ -290,6 +282,11 @@ detectorKEY1: work.edgeDetector(bordaSubida)
 		  entrada => (not KEY(1)),
 		  saida => saidaDetK1);
 		  
+detectorR: work.edgeDetector(bordaSubida)
+        port map (clk => CLOCK_50,
+		  entrada => (not FPGA_RESET),
+		  saida => saidaDetR);
+	
 FFK0: entity work.FlipFlop port map (DIN => '1',
 												DOUT => saidaFFK0,
 												ENABLE => '1',
@@ -342,6 +339,8 @@ limpaK0 <= habEscritaMEM and Data_Address(8) and Data_Address(7) and Data_Addres
 limpaK1 <= habEscritaMEM and Data_Address(8) and Data_Address(7) and Data_Address(6) and Data_Address(5) and Data_Address(4) and Data_Address(3) and Data_Address(2)
                   and Data_Address(1) and (not Data_Address(0));
 
+limpaR <= habEscritaMEM and Data_Address(8) and Data_Address(7) and Data_Address(6) and Data_Address(5) and Data_Address(4) and Data_Address(3) and Data_Address(2)
+                  and (not Data_Address(1)) and Data_Address(0);
 			 
 LEDR (9) <= saida_FF1;
 LEDR (8) <= saida_FF2;
