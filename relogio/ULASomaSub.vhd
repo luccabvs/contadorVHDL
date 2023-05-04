@@ -6,7 +6,7 @@ entity ULASomaSub is
     generic ( larguraDados : natural := 4 );
     port (
       entradaA, entradaB:  in STD_LOGIC_VECTOR((larguraDados-1) downto 0);
-      seletor:  in STD_LOGIC_VECTOR(2 downto 0);
+      seletor:  in STD_LOGIC_VECTOR(1 downto 0);
       saida:    out STD_LOGIC_VECTOR((larguraDados-1) downto 0);
 		saida_flipFlop: out std_logic
     );
@@ -21,8 +21,8 @@ architecture comportamento of ULASomaSub is
       soma      <= STD_LOGIC_VECTOR(unsigned(entradaA) + unsigned(entradaB));
       subtracao <= STD_LOGIC_VECTOR(unsigned(entradaA) - unsigned(entradaB));
 		passa <= entradaB;
-      dados <= soma when (seletor = "001") else
-					subtracao when (seletor = "000") else passa;
+      dados <= soma when (seletor = "01") else
+					subtracao when (seletor = "00") else passa;
 		saida_flipFlop <= NOT(dados(7) or dados(6) or dados(5) or dados(4) or dados(3) or dados(2) or dados(1) or dados(0));
 		saida <= dados;
 

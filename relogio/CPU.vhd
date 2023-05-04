@@ -23,14 +23,14 @@ end entity;
 architecture arquitetura of CPU is
 
   signal Instrucao : std_logic_vector(14 downto 0);
-  signal Sinais_Controle : std_logic_vector (12 downto 0);
+  signal Sinais_Controle : std_logic_vector (11 downto 0);
   signal Endereco_ROM : std_logic_vector (8 downto 0);
   signal DataIN : std_logic_vector(7 downto 0);
   signal proxPC : std_logic_vector (8 downto 0);
   signal CLK : std_logic;
   signal SelMUX : std_logic;
   signal Habilita_A : std_logic;
-  signal Operacao_ULA : std_logic_vector (2 downto 0);
+  signal Operacao_ULA : std_logic_vector (1 downto 0);
   
   signal JMP: std_logic;
   signal JEQ: std_logic;
@@ -138,14 +138,14 @@ Data_OUT <= REG_ULA_A;
 endRegs <= Instrucao(10 downto 9); 
 Data_Address <= Instrucao(8 downto 0);
 
-habEscritaRetorno <= Sinais_Controle(12);
-JMP <= Sinais_Controle(11);
-RET <= Sinais_Controle(10);
-JSR <= Sinais_Controle(9);
-JEQ <= Sinais_Controle(8);
-selMUX <= Sinais_Controle(7);
-habWrRegs <= Sinais_Controle(6);
-Operacao_ULA <= Sinais_Controle(5 downto 3);
+habEscritaRetorno <= Sinais_Controle(11);
+JMP <= Sinais_Controle(10);
+RET <= Sinais_Controle(9);
+JSR <= Sinais_Controle(8);
+JEQ <= Sinais_Controle(7);
+selMUX <= Sinais_Controle(6);
+habWrRegs <= Sinais_Controle(5);
+Operacao_ULA <= Sinais_Controle(4 downto 3);
 habFlag <= Sinais_Controle(2);
 Rd <= Sinais_Controle(1);
 Wr <= Sinais_Controle(0);

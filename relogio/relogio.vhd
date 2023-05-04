@@ -107,8 +107,7 @@ CPU : entity work.CPU port map (
 					Data_Address => Data_Address,
 					Data_OUT => Dado_Escrito
 					);
-					
-													
+															
 RAM : entity work.memoriaRAM
 		generic map (dataWidth => 8, addrWidth => 6)
 		port map (addr => Data_Address(5 downto 0), 
@@ -119,7 +118,6 @@ RAM : entity work.memoriaRAM
 		dado_in => Dado_Escrito,
 		dado_out => Dado_Lido
 		);
-		
 		  
 REG8 : entity work.registradorGenerico   generic map (larguraDados => 8)
           port map (
