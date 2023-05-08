@@ -29,7 +29,6 @@ architecture arquitetura of CPU is
   signal proxPC : std_logic_vector (8 downto 0);
   signal CLK : std_logic;
   signal SelMUX : std_logic;
-  signal Habilita_A : std_logic;
   signal Operacao_ULA : std_logic_vector (1 downto 0);
   
   signal JMP: std_logic;
@@ -47,7 +46,6 @@ architecture arquitetura of CPU is
   signal MUX_B_ULA : std_logic_vector (7 downto 0);
   signal REG_ULA_A : std_logic_vector (7 downto 0);
   signal habWrRegs : std_logic; 
-  signal endRegs: std_logic_vector(1 downto 0); 
   signal Saida_ULA : std_logic_vector (7 downto 0);
   
   
@@ -78,7 +76,7 @@ MUX_DESVIO :  entity work.muxGenericoNx1  generic map (larguraEntrada => 9, larg
 -- O port map completo do banco de registradores.
 REGS : entity work.bancoRegistradoresArqRegMem   generic map (larguraDados => 8, larguraEndBancoRegs => 2)
           port map (clk => CLK,
-              endereco => endRegs,
+              endereco => Instrucao (10 downto 9),
               dadoEscrita => Saida_ULA,
               habilitaEscrita => habWrRegs,
               saida  => REG_ULA_A);
@@ -135,7 +133,6 @@ END_RET : entity work.registradorGenerico   generic map (larguraDados => 9)
 ROM_Address <= Endereco_ROM;
 DataIn <= Data_IN;
 Data_OUT <= REG_ULA_A;
-endRegs <= Instrucao(10 downto 9); 
 Data_Address <= Instrucao(8 downto 0);
 
 habEscritaRetorno <= Sinais_Controle(11);

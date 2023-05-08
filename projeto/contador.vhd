@@ -13,7 +13,7 @@ entity contador is
 	 SW: in std_logic_vector(9 downto 0);
     LEDR  : out std_logic_vector(9 downto 0);
 	 HEX0, HEX1, HEX2, HEX3, HEX4, HEX5: out std_logic_vector(6 downto 0);
-	 FPGA_RESET: in std_logic
+	 FPGA_RESET_N: in std_logic
   );
 end entity;
 
@@ -284,7 +284,7 @@ detectorKEY1: work.edgeDetector(bordaSubida)
 		  
 detectorR: work.edgeDetector(bordaSubida)
         port map (clk => CLOCK_50,
-		  entrada => (not FPGA_RESET),
+		  entrada => (not FPGA_RESET_N),
 		  saida => saidaDetR);
 	
 FFK0: entity work.FlipFlop port map (DIN => '1',
