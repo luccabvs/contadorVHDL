@@ -1,94 +1,120 @@
-!SETUP
-LDI $0 --Carrega 0 no acumulador
-STA @0 --Valor 0 em unidade
-STA @1 --Valor 0 em dezena
-STA @2 --Valor 0 em centena
-STA @3 --Valor 0 em unidade de milhar
-STA @4 --Valor 0 em dezena de milhar
-STA @5 --Valor 0 em centena de milhar
-STA @256 --Valor 0 no conjunto de 8 LEDs
-STA @257 --Valor 0 no LEDR8
-STA @258 --Valor 0 no LEDR9
-STA @288 --Valor 0 no HEX0
-STA @289 --Valor 0 no HEX1
-STA @290 --Valor 0 no HEX2
-STA @291 --Valor 0 no HEX3
-STA @292 --Valor 0 no HEX4
-STA @293 --Valor 0 no HEX5
-STA @510 --Limpa leitura KEY1
-STA @511 --Limpa leitura KEY0
-STA @509 --Limpa leitura FPGA RESET
-STA @6 --Armazena o valor 0 em MEM[61]
-LDI $10 --Carrega 10 no Acumulador
-STA @8 --Armazena o valor 10 em MEM[62]
-LDI $1 --Carregado 10 no Acumulador
-STA @7 --Armazena o valor 1 em MEM[63]
-!START
-LDA @511 --Carrega o valor da leitura do KEY0
-CEQ @63 --Compara o valor do acumulador com 1
-JEQ @INCUNIDADE --Se for igual a 1, chama a função INCUNIDADE
-JMP @START --Retorna ao início do programa
-!INCUNIDADE
-STA @511 --Limpa leitura KEY0
-LDA @0 --Carrega o valor das unidades
-SOMA @63 --Soma o valor do acumulador com 1
-CEQ @62 --Compara o valor do acumulador com 10
-JEQ @INCDEZENA --Se for igual a 10, incrementa a dezena
-STA @0 --Armazena o valor do acumulador em HEX0
-JMP @DISPLAY --Exibe valor
-!INCDEZENA
-LDA @61 --Carrega o valor de 0 no acumulador
-STA @0 --Zera as unidades
-LDA @1 --Carrega o valor das dezenas
-SOMA @63 --Soma o valor do acumulador com 1
-CEQ @62 --Compara o valor do acumulador com 10
-JEQ @INCCENTENA --Se for igual a 10, incrementa a centena
-STA @1 --Armazena o valor do acumulador em HEX1
-JMP @DISPLAY --Exibe valor
-!INCCENTENA
-LDA @61 --Carrega o valor de 0 no acumulador
-STA @1 --Zera as dezenas
-LDA @2 --Carrega o valor das centenas
-SOMA @63 --Soma o valor do acumulador com 1
-CEQ @62 --Compara o valor do acumulador com 10
-JEQ @INCUMILHAR --Se for igual a 10, incrementa a unidade de milhar
-STA @2 --Armazena o valor do acumulador em HEX2
-JMP @DISPLAY --Exibe valor
-!INCUMILHAR
-LDA @61 --Carrega o valor de 0 no acumulador
-STA @2 --Zera as centenas
-LDA @3 --Carrega o valor das unidades de milhar
-SOMA @63 --Soma o valor do acumulador com 1
-CEQ @62 --Compara o valor do acumulador com 10
-JEQ @INCDEZMILHAR --Se for igual a 10, incrementa a dezena de milhar
-STA @3 --Armazena o valor do acumulador em HEX3
-JMP @DISPLAY --Exibe valor
-!INCDEZMILHAR
-LDA @61 --Carrega o valor de 0 no acumulador
-STA @3 --Zera as unidades de milhar
-LDA @4 --Carrega o valor das dezenas de milhar
-SOMA @63 --Soma o valor do acumulador com 1
-CEQ @62 --Compara o valor do acumulador com 10
-JEQ @INCCENTMILHAR --Se for igual a 10, incrementa a centena de milhar
-STA @4 --Armazena o valor do acumulador em HEX4
-JMP @DISPLAY --Exibe valor
-!INCCENTMILHAR
-LDA @61 --Carrega o valor de 0 no acumulador
-STA @4 --Zera as dezenas de milhar
-LDA @5 --Carrega o valor das centenas de milhar
-SOMA @63 --Soma o valor do acumulador com 1
-STA @5 --Armazena o valor do acumulador em HEX5
-JMP @DISPLAY --Exibe valor
-!DISPLAY
-LDA @0 --Carrega o valor das unidades
-STA @288 --Armazena o valor do acumulador em HEX0
-LDA @1 --Carrega o valor das dezenas
-STA @289 --Armazena o valor do acumulador em HEX1
-LDA @2 --Carrega o valor das centenas
-STA @290 --Armazena o valor do acumulador em HEX2
-LDA @3 --Carrega o valor das unidades de milhar
-STA @291 --Armazena o valor do acumulador em HEX3
-LDA @4 --Carrega o valor das dezenas de milhar
-STA @292 --Armazena o valor do acumulador em HEX4
-LDA @5 --Carrega o valor das centenas de milhar
-STA @293 --Armazena o valor do acumulador em HEX5
+!RESET
+LDI R0, $0 --CARREGA O R0 COM O VALOR 0
+STA R0, @0  -- LIMPA LUGAR DA MEMÓRIA 0
+STA R0, @58  --LIMPA UNIDADE SEGUNDOS
+STA R0, @59 --LIMPA DEZENA SEGUNDOS
+STA R0, @60 --LIMPA UNIDADE MINUTOS
+STA R0, @61 --LIMPA DEZENA MINUTOS
+STA R0, @62 --LIMPA UNIDADE HORAS
+STA R0, @63 --LIMPA DEZENA HORAS
+STA R0, @288 --LIMPA H0
+STA R0, @289 --LIMPA H1
+STA R0, @290 --LIMPA H2
+STA R0, @291 --LIMPA H3
+STA R0, @292 --LIMPA H4
+STA R0, @293 --LIMPA H5
+STA R0, @511 --LIMPA K0
+STA R0, @510 --LIMPA K1
+STA R0, @508 --LIMPA TEMPO
+STA R0, @509 --LIMPA RESET
+LDI R0, $1 --CARREGA O R0 COM O VALOR 1
+STA R0, @1  -- ARMAZENA O VALOR 1 NA POSICAO 1
+LDI R0, $3 --CARREGA O R0 COM O VALOR 3
+STA R0, @3  -- ARMAZENA O VALOR 3 NA POSICAO 3
+LDI R0, $4 --CARREGA O R0 COM O VALOR 4
+STA R0, @4  -- ARMAZENA O VALOR 4 NA POSICAO 4
+LDI R0, $6 --CARREGA O R0 COM O VALOR 6
+STA R0, @6  -- ARMAZENA O VALOR 6 NA POSICAO 6
+LDI R0, $10 --CARREGA O R0 COM O VALOR 10
+STA R0, @10  -- ARMAZENA O VALOR 10 NA POSICAO 10
+!INICIO
+LDA R1, @353 --CARREGA O VALOR DE K1
+CEQ R1, @0 --COMPARA COM 0  
+JEQ @LOOP
+JSR @HORAS
+!LOOP 
+LDA R0, @383 --CARREGA O VALOR DE CLOCK 
+CEQ R0, @0 --COMPARA COM 0
+JEQ @INICIO
+JSR @AUMENTAUNISEG
+JSR @DISPLAY
+JMP @INICIO
+!HORAS
+RET
+!AUMENTAUNISEG
+STA R0, @508
+LDA R0, @58 --CARREGA UNIDADE SEGUNDOS
+SOMA R0, @1 --SOMA 1 
+CEQ R0, @10 --COMPARA COM 10
+JEQ @AUMENTAMDEZSEG
+STA R0, @58 --COPIA PARA UNIDADE SEGUNDOS
+RET
+!AUMENTAMDEZSEG
+LDA R0, @0 --CARREGA O R0 COM O VALOR 0
+STA R0, @58  
+LDA R0, @59 --CARREGA DEZENA SEGUNDOS
+SOMA R0, @1 --SOMA 1
+CEQ R0, @6 --COMPARA COM 6
+JEQ @AUMENTAMUNIMIN
+STA R0, @59 --COPIA PARA DEZENA SEGUNDOS
+RET
+!AUMENTAMUNIMIN
+LDA R0, @0 --CARREGA O R0 COM O VALOR 0
+STA R0, @59 --LIMPA DEZENA SEGUNDOS
+LDA R0, @60 --CARREGA UNIDADE MINUTOS
+SOMA R0, @1 --SOMA 1
+CEQ R0, @10 --COMPARA COM 10
+JEQ @AUMENTAMDEZMIN
+STA R0, @60 --COPIA PARA UNIDADE MINUTOS
+RET
+!AUMENTAMDEZMIN
+LDA R0, @0 --CARREGA O R0 COM O VALOR 0
+STA R0, @60 --LIMPA UNIDADE MINUTOS
+LDA R0, @61 --CARREGA DEZENA MINUTOS
+SOMA R0, @1 --SOMA 1
+CEQ R0, @6 --COMPARA COM 6
+JEQ @AUMENTAMUNIHOR
+STA R0, @61 --COPIA PARA DEZENA MINUTOS
+RET
+!AUMENTAMUNIHOR
+LDA R0, @0 --CARREGA O R0 COM O VALOR 0
+STA R0, @61 --LIMPA DEZENA MINUTOS
+LDA R0, @62 --CARREGA UNIDADE HORAS
+SOMA R0, @1 --SOMA 1
+LDA R2, @63 --CARREGA DEZENA HORAS
+CEQ R2, @2 --COMPARA COM 2
+JEQ @CHECK2
+CEQ R0, @10 --COMPARA COM 10
+JEQ @AUMENTAMDEZHOR
+STA R0, @62 --COPIA PARA UNIDADE HORAS
+RET
+!CHECK2
+CEQ R0, @4 --COMPARA COM 4
+JEQ @NEWDAY
+STA R0, @62
+RET
+!AUMENTAMDEZHOR
+LDA R0, @0 --CARREGA O R0 COM O VALOR 0
+STA R0, @62 --LIMPA UNIDADE HORAS
+LDA R0, @63 --CARREGA DEZENA HORAS
+SOMA R0, @1 --SOMA 1
+CEQ R0, @3 --COMPARA COM 3
+JEQ @NEWDAY
+!NEWDAY 
+LDA R0, @0 --CARREGA O R0 COM O VALOR 0
+STA R0, @63 --LIMPA DEZENA HORAS
+RET 
+!DISPLAY 
+LDA R2, @58 --CARREGA UNIDADE SEGUNDOS
+STA R2, @288 --COPIA PARA H0
+LDA R2, @59 --CARREGA DEZENA SEGUNDOS
+STA R2, @289 --COPIA PARA H1
+LDA R2, @60 --CARREGA UNIDADE MINUTOS
+STA R2, @290 --COPIA PARA H2
+LDA R2, @61 --CARREGA DEZENA MINUTOS
+STA R2, @291 --COPIA PARA H3
+LDA R2, @62 --CARREGA UNIDADE HORAS
+STA R2, @292 --COPIA PARA H4
+LDA R2, @63 --CARREGA DEZENA HORAS
+STA R2, @293 --COPIA PARA H5
+RET
