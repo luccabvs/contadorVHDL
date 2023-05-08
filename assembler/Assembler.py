@@ -7,8 +7,8 @@ outputMIF = 'initROM.mif' #Arquivo de saída que contém o binário formatado pa
 registradores =	{ 
        "R0":   ' & "00"',
        "R1":   ' & "01"',
-       "R2":   ' & "02"',
-       "R3":   ' & "03"',
+       "R2":   ' & "10"',
+       "R3":   ' & "11"',
 }
 
 #Converte o valor após o caractere arroba '@'
