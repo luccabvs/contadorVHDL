@@ -1,0 +1,140 @@
+library IEEE;
+use IEEE.std_logic_1164.all;
+use ieee.numeric_std.all;
+
+entity memoriaROM is
+   generic (
+          dataWidth: natural := 4;
+          addrWidth: natural := 3
+    );
+   port (
+          Endereco : in std_logic_vector (addrWidth-1 DOWNTO 0);
+          Dado : out std_logic_vector (dataWidth-1 DOWNTO 0)
+    );
+end entity;
+
+architecture assincrona of memoriaROM is
+
+  constant NOP  : std_logic_vector(3 downto 0) := "0000";
+  constant LDA  : std_logic_vector(3 downto 0) := "0001";
+  constant SOMA : std_logic_vector(3 downto 0) := "0010";
+  constant SUB  : std_logic_vector(3 downto 0) := "0011";
+  constant LDI  : std_logic_vector(3 downto 0) := "0100";
+  constant STA  : std_logic_vector(3 downto 0) := "0101";
+  constant JMP  : std_logic_vector(3 downto 0) := "0110";
+  constant JEQ  : std_logic_vector(3 downto 0) := "0111";
+  constant CEQ  : std_logic_vector(3 downto 0) := "1000";
+  constant JSR  : std_logic_vector(3 downto 0) := "1001";
+  constant RET  : std_logic_vector(3 downto 0) := "1010";
+
+  type blocoMemoria is array(0 TO 2**addrWidth - 1) of std_logic_vector(dataWidth-1 DOWNTO 0);
+
+  function initMemory
+        return blocoMemoria is variable tmp : blocoMemoria := (others => (others => '0'));
+  begin
+      -- Palavra de Controle = SelMUX, Habilita_A, Reset_A, Operacao_ULA
+      -- Inicializa os endereços:
+      tmp(0) := NOP & '0' & x"00";	-- !SETUP
+tmp(1) := LDI & '0' & x"00";	-- LDI $0 	--Carrega 0 no acumulador
+tmp(2) := STA & '0' & x"00";	-- STA @0 	--Valor 0 em unidade
+tmp(3) := STA & '0' & x"01";	-- STA @1 	--Valor 0 em dezena
+tmp(4) := STA & '0' & x"02";	-- STA @2 	--Valor 0 em centena
+tmp(5) := STA & '0' & x"03";	-- STA @3 	--Valor 0 em unidade de milhar
+tmp(6) := STA & '0' & x"04";	-- STA @4 	--Valor 0 em dezena de milhar
+tmp(7) := STA & '0' & x"05";	-- STA @5 	--Valor 0 em centena de milhar
+tmp(8) := STA & '1' & x"00";	-- STA @256 	--Valor 0 no conjunto de 8 LEDs
+tmp(9) := STA & '1' & x"01";	-- STA @257 	--Valor 0 no LEDR8
+tmp(10) := STA & '1' & x"02";	-- STA @258 	--Valor 0 no LEDR9
+tmp(11) := STA & '1' & x"20";	-- STA @288 	--Valor 0 no HEX0
+tmp(12) := STA & '1' & x"21";	-- STA @289 	--Valor 0 no HEX1
+tmp(13) := STA & '1' & x"22";	-- STA @290 	--Valor 0 no HEX2
+tmp(14) := STA & '1' & x"23";	-- STA @291 	--Valor 0 no HEX3
+tmp(15) := STA & '1' & x"24";	-- STA @292 	--Valor 0 no HEX4
+tmp(16) := STA & '1' & x"25";	-- STA @293 	--Valor 0 no HEX5
+tmp(17) := STA & '1' & x"FE";	-- STA @510 	--Limpa leitura KEY1
+tmp(18) := STA & '1' & x"FF";	-- STA @511 	--Limpa leitura KEY0
+tmp(19) := STA & '1' & x"FD";	-- STA @509 	--Limpa leitura FPGA RESET
+tmp(20) := STA & '0' & x"06";	-- STA @6 	--Armazena o valor 0 em MEM[6]
+tmp(21) := LDI & '0' & x"0A";	-- LDI $10 	--Carrega 10 no Acumulador
+tmp(22) := STA & '0' & x"08";	-- STA @8 	--Armazena o valor 10 em MEM[8]
+tmp(23) := LDI & '0' & x"01";	-- LDI $1 	--Carregado 10 no Acumulador
+tmp(24) := STA & '0' & x"07";	-- STA @7 	--Armazena o valor 1 em MEM[7]
+tmp(25) := NOP & '0' & x"00";	-- !START
+tmp(26) := LDA & '1' & x"FF";	-- LDA @511 	--Carrega o valor da leitura do KEY0
+tmp(27) := CEQ & '0' & x"07";	-- CEQ @7 	--Compara o valor do acumulador com 1
+tmp(28) := JEQ & '0' & x"1E";	-- JEQ @INCUNIDADE 	--Se for igual a 1, chama a função INCUNIDADE
+tmp(29) := JMP & '0' & x"19";	-- JMP @START 	--Retorna ao início do programa
+tmp(30) := NOP & '0' & x"00";	-- !INCUNIDADE
+tmp(31) := STA & '1' & x"FF";	-- STA @511 	--Limpa leitura KEY0
+tmp(32) := LDA & '0' & x"00";	-- LDA @0 	--Carrega o valor das unidades
+tmp(33) := SOMA & '0' & x"07";	-- SOMA @7 	--Soma o valor do acumulador com 1
+tmp(34) := CEQ & '0' & x"08";	-- CEQ @8 	--Compara o valor do acumulador com 10
+tmp(35) := JEQ & '0' & x"26";	-- JEQ @INCDEZENA 	--Se for igual a 10, incrementa a dezena
+tmp(36) := STA & '0' & x"00";	-- STA @0 	--Armazena o valor do acumulador em HEX0
+tmp(37) := JMP & '0' & x"51";	-- JMP @DISPLAY 	--Exibe valor
+tmp(38) := NOP & '0' & x"00";	-- !INCDEZENA
+tmp(39) := LDA & '0' & x"06";	-- LDA @6 	--Carrega o valor de 0 no acumulador
+tmp(40) := STA & '0' & x"00";	-- STA @0 	--Zera as unidades
+tmp(41) := LDA & '0' & x"01";	-- LDA @1 	--Carrega o valor das dezenas
+tmp(42) := SOMA & '0' & x"07";	-- SOMA @7 	--Soma o valor do acumulador com 1
+tmp(43) := CEQ & '0' & x"08";	-- CEQ @8 	--Compara o valor do acumulador com 10
+tmp(44) := JEQ & '0' & x"2F";	-- JEQ @INCCENTENA 	--Se for igual a 10, incrementa a centena
+tmp(45) := STA & '0' & x"01";	-- STA @1 	--Armazena o valor do acumulador em HEX1
+tmp(46) := JMP & '0' & x"51";	-- JMP @DISPLAY 	--Exibe valor
+tmp(47) := NOP & '0' & x"00";	-- !INCCENTENA
+tmp(48) := LDA & '0' & x"06";	-- LDA @6 	--Carrega o valor de 0 no acumulador
+tmp(49) := STA & '0' & x"01";	-- STA @1 	--Zera as dezenas
+tmp(50) := LDA & '0' & x"02";	-- LDA @2 	--Carrega o valor das centenas
+tmp(51) := SOMA & '0' & x"07";	-- SOMA @7 	--Soma o valor do acumulador com 1
+tmp(52) := CEQ & '0' & x"08";	-- CEQ @8 	--Compara o valor do acumulador com 10
+tmp(53) := JEQ & '0' & x"38";	-- JEQ @INCUMILHAR 	--Se for igual a 10, incrementa a unidade de milhar
+tmp(54) := STA & '0' & x"02";	-- STA @2 	--Armazena o valor do acumulador em HEX2
+tmp(55) := JMP & '0' & x"51";	-- JMP @DISPLAY 	--Exibe valor
+tmp(56) := NOP & '0' & x"00";	-- !INCUMILHAR
+tmp(57) := LDA & '0' & x"06";	-- LDA @6 	--Carrega o valor de 0 no acumulador
+tmp(58) := STA & '0' & x"02";	-- STA @2 	--Zera as centenas
+tmp(59) := LDA & '0' & x"03";	-- LDA @3 	--Carrega o valor das unidades de milhar
+tmp(60) := SOMA & '0' & x"07";	-- SOMA @7 	--Soma o valor do acumulador com 1
+tmp(61) := CEQ & '0' & x"08";	-- CEQ @8 	--Compara o valor do acumulador com 10
+tmp(62) := JEQ & '0' & x"41";	-- JEQ @INCDEZMILHAR 	--Se for igual a 10, incrementa a dezena de milhar
+tmp(63) := STA & '0' & x"03";	-- STA @3 	--Armazena o valor do acumulador em HEX3
+tmp(64) := JMP & '0' & x"51";	-- JMP @DISPLAY 	--Exibe valor
+tmp(65) := NOP & '0' & x"00";	-- !INCDEZMILHAR
+tmp(66) := LDA & '0' & x"06";	-- LDA @6 	--Carrega o valor de 0 no acumulador
+tmp(67) := STA & '0' & x"03";	-- STA @3 	--Zera as unidades de milhar
+tmp(68) := LDA & '0' & x"04";	-- LDA @4 	--Carrega o valor das dezenas de milhar
+tmp(69) := SOMA & '0' & x"07";	-- SOMA @7 	--Soma o valor do acumulador com 1
+tmp(70) := CEQ & '0' & x"08";	-- CEQ @8 	--Compara o valor do acumulador com 10
+tmp(71) := JEQ & '0' & x"4A";	-- JEQ @INCCENTMILHAR 	--Se for igual a 10, incrementa a centena de milhar
+tmp(72) := STA & '0' & x"04";	-- STA @4 	--Armazena o valor do acumulador em HEX4
+tmp(73) := JMP & '0' & x"51";	-- JMP @DISPLAY 	--Exibe valor
+tmp(74) := NOP & '0' & x"00";	-- !INCCENTMILHAR
+tmp(75) := LDA & '0' & x"06";	-- LDA @6 	--Carrega o valor de 0 no acumulador
+tmp(76) := STA & '0' & x"04";	-- STA @4 	--Zera as dezenas de milhar
+tmp(77) := LDA & '0' & x"05";	-- LDA @5 	--Carrega o valor das centenas de milhar
+tmp(78) := SOMA & '0' & x"07";	-- SOMA @7 	--Soma o valor do acumulador com 1
+tmp(79) := STA & '0' & x"05";	-- STA @5 	--Armazena o valor do acumulador em HEX5
+tmp(80) := JMP & '0' & x"51";	-- JMP @DISPLAY 	--Exibe valor
+tmp(81) := NOP & '0' & x"00";	-- !DISPLAY
+tmp(82) := LDA & '0' & x"00";	-- LDA @0 	--Carrega o valor das unidades
+tmp(83) := STA & '1' & x"20";	-- STA @288 	--Armazena o valor do acumulador em HEX0
+tmp(84) := LDA & '0' & x"01";	-- LDA @1 	--Carrega o valor das dezenas
+tmp(85) := STA & '1' & x"21";	-- STA @289 	--Armazena o valor do acumulador em HEX1
+tmp(86) := LDA & '0' & x"02";	-- LDA @2 	--Carrega o valor das centenas
+tmp(87) := STA & '1' & x"22";	-- STA @290 	--Armazena o valor do acumulador em HEX2
+tmp(88) := LDA & '0' & x"03";	-- LDA @3 	--Carrega o valor das unidades de milhar
+tmp(89) := STA & '1' & x"23";	-- STA @291 	--Armazena o valor do acumulador em HEX3
+tmp(90) := LDA & '0' & x"04";	-- LDA @4 	--Carrega o valor das dezenas de milhar
+tmp(91) := STA & '1' & x"24";	-- STA @292 	--Armazena o valor do acumulador em HEX4
+tmp(92) := LDA & '0' & x"05";	-- LDA @5 	--Carrega o valor das centenas de milhar
+tmp(93) := STA & '1' & x"25";	-- STA @293 	--Armazena o valor do acumulador em HEX5
+
+        return tmp;
+		  
+    end initMemory;
+
+    signal memROM : blocoMemoria := initMemory;
+
+begin
+    Dado <= memROM (to_integer(unsigned(Endereco)));
+end architecture;
