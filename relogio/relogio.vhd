@@ -13,7 +13,7 @@ entity relogio is
 	 SW: in std_logic_vector(9 downto 0);
     LEDR  : out std_logic_vector(9 downto 0);
 	 HEX0, HEX1, HEX2, HEX3, HEX4, HEX5: out std_logic_vector(6 downto 0);
-	 FPGA_RESET: in std_logic
+	 FPGA_RESET_N: in std_logic
   );
 end entity;
 
@@ -72,6 +72,8 @@ architecture arquitetura of relogio is
 	signal saidaFFK0: std_logic;
 	signal saidaFFK1: std_logic;
 	signal saidaFFR: std_logic;
+	signal habTempo:  std_logic;
+	signal limpaTempo:  std_logic;
 
 
 begin
@@ -99,7 +101,8 @@ CPU : entity work.CPU port map (
 					Data_Address => Data_Address,
 					Data_OUT => Dado_Escrito
 					);
-															
+					
+													
 RAM : entity work.memoriaRAM
 		generic map (dataWidth => 8, addrWidth => 6)
 		port map (addr => Data_Address(5 downto 0), 
@@ -110,10 +113,11 @@ RAM : entity work.memoriaRAM
 		dado_in => Dado_Escrito,
 		dado_out => Dado_Lido
 		);
+		
 		  
 REG8 : entity work.registradorGenerico   generic map (larguraDados => 8)
           port map (
-			 DIN => Dado_Escrito, 
+			 DIN => Dado_Escrito(7 downto 0), 
 			 DOUT => saidaREG8, 
 			 ENABLE => habReg8, 
 			 CLK => CLK, 
@@ -175,6 +179,7 @@ FF2: entity work.FlipFlop port map (
 				ENABLE => habFF2,
 				CLK => CLK,
 				RST => '0');
+
 
 DEC1 :  entity work.decoder3x8
         port map( entrada => Data_Address(8 downto 6),
@@ -277,11 +282,11 @@ detectorKEY1: work.edgeDetector(bordaSubida)
 		  entrada => (not KEY(1)),
 		  saida => saidaDetK1);
 		  
-detectorRe: work.edgeDetector(bordaSubida)
-        port map (clk => CLOCK_50, 
-		  entrada => (not FPGA_RESET),
+detectorR: work.edgeDetector(bordaSubida)
+        port map (clk => CLOCK_50,
+		  entrada => (not FPGA_RESET_N),
 		  saida => saidaDetR);
-		  
+	
 FFK0: entity work.FlipFlop port map (DIN => '1',
 												DOUT => saidaFFK0,
 												ENABLE => '1',
@@ -299,6 +304,12 @@ FFRESET: entity work.FlipFlop port map (DIN => '1',
 												ENABLE => '1',
 											   CLK => saidaDetR,
 												RST => limpaR);
+												
+interfaceBaseTempo : entity work.divisorGenerico_e_Interface
+              port map (clk => CLOCK_50,
+              habilitaLeitura => habTempo,
+              limpaLeitura => limpaTempo,
+              leituraUmSegundo => Dado_Lido);
 		  
 
 habReg8 <= saida_decoder1(4) and habEscritaMEM and saida_decoder2(0) and (not Data_Address(5));		
@@ -328,15 +339,20 @@ habK2TS <= habLeituraMEM and Data_Address(5) and saida_decoder2(2) and saida_dec
 habK3TS <= habLeituraMEM and Data_Address(5) and saida_decoder2(3) and saida_decoder1(5);
 habFPGARTS <= habLeituraMEM and Data_Address(5) and saida_decoder2(4) and saida_decoder1(5);
 
+habTempo <= habLeituraMEM and Data_Address(8) and (not Data_Address(7)) and Data_Address(6) and Data_Address(5) and Data_Address(4) and Data_Address(3) and Data_Address(2)
+                  and Data_Address(1) and Data_Address(0); -- @383
+
 limpaK0 <= habEscritaMEM and Data_Address(8) and Data_Address(7) and Data_Address(6) and Data_Address(5) and Data_Address(4) and Data_Address(3) and Data_Address(2)
                   and Data_Address(1) and Data_Address(0);
 						
 limpaK1 <= habEscritaMEM and Data_Address(8) and Data_Address(7) and Data_Address(6) and Data_Address(5) and Data_Address(4) and Data_Address(3) and Data_Address(2)
                   and Data_Address(1) and (not Data_Address(0));
-						
+
 limpaR <= habEscritaMEM and Data_Address(8) and Data_Address(7) and Data_Address(6) and Data_Address(5) and Data_Address(4) and Data_Address(3) and Data_Address(2)
                   and (not Data_Address(1)) and Data_Address(0);
-
+						
+limpaTempo <= habEscritaMEM and Data_Address(8) and Data_Address(7) and Data_Address(6) and Data_Address(5) and Data_Address(4) and Data_Address(3) and Data_Address(2)
+                  and (not Data_Address(1)) and (not Data_Address(0)); --@508
 			 
 LEDR (9) <= saida_FF1;
 LEDR (8) <= saida_FF2;
