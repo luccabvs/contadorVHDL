@@ -19,20 +19,187 @@ DATA_RADIX=HEX;
 
 CONTENT BEGIN
 --endereco : dado;
-0 : 90E;	-- JSR @14		
-1 : 605;	-- JMP @5		
-2 : 709;	-- JEQ @9		
-3 : 000;	-- NOP
-4 : 000;	-- NOP
-5 : 405;	-- LDI $5		
-6 : 500;	-- STA $0		
-7 : 800;	-- CEQ @0		
-8 : 602;	-- JMP @2		
-9 : 000;	-- NOP
-10 : 404;	-- LDI $4		
-11 : 800;	-- CEQ @0		
-12 : 703;	-- JEQ @3		
-13 : 60D;	-- JMP @13		
-14 : 000;	-- NOP
-15 : A00;	-- RET			
+0 : NOP & 00 & '0' & 00;	-- !RESET
+1 : LDI & 00 & '0' & 00;	-- LDI R0, $0 	--CARREGA O R0 COM O VALOR 0
+2 : STA & 00 & '0' & 00;	-- STA R0, @0  	--LIMPA LUGAR DA MEMÓRIA 0
+3 : STA & 00 & '0' & 3A;	-- STA R0, @58  	--LIMPA UNIDADE SEGUNDOS
+4 : STA & 00 & '0' & 3B;	-- STA R0, @59 	--LIMPA DEZENA SEGUNDOS
+5 : STA & 00 & '0' & 3C;	-- STA R0, @60 	--LIMPA UNIDADE MINUTOS
+6 : STA & 00 & '0' & 3D;	-- STA R0, @61 	--LIMPA DEZENA MINUTOS
+7 : STA & 00 & '0' & 3E;	-- STA R0, @62 	--LIMPA UNIDADE HORAS
+8 : STA & 00 & '0' & 3F;	-- STA R0, @63 	--LIMPA DEZENA HORAS
+9 : STA & 00 & '1' & 20;	-- STA R0, @288 	--LIMPA H0
+10 : STA & 00 & '1' & 21;	-- STA R0, @289 	--LIMPA H1
+11 : STA & 00 & '1' & 22;	-- STA R0, @290 	--LIMPA H2
+12 : STA & 00 & '1' & 23;	-- STA R0, @291 	--LIMPA H3
+13 : STA & 00 & '1' & 24;	-- STA R0, @292 	--LIMPA H4
+14 : STA & 00 & '1' & 25;	-- STA R0, @293 	--LIMPA H5
+15 : STA & 00 & '1' & FF;	-- STA R0, @511 	--LIMPA K0
+16 : STA & 00 & '1' & FE;	-- STA R0, @510 	--LIMPA K1
+17 : STA & 00 & '1' & FC;	-- STA R0, @508 	--LIMPA TEMPO
+18 : STA & 00 & '1' & FD;	-- STA R0, @509 	--LIMPA RESET
+19 : LDI & 00 & '0' & 01;	-- LDI R0, $1 	--CARREGA O R0 COM O VALOR 1
+20 : STA & 00 & '0' & 01;	-- STA R0, @1  	--ARMAZENA O VALOR 1 NA POSICAO 1
+21 : LDI & 00 & '0' & 02;	-- LDI R0, $2 	--CARREGA O R0 COM O VALOR 2
+22 : STA & 00 & '0' & 02;	-- STA R0, @2  	--ARMAZENA O VALOR 2 NA POSICAO 2
+23 : LDI & 00 & '0' & 03;	-- LDI R0, $3 	--CARREGA O R0 COM O VALOR 3
+24 : STA & 00 & '0' & 03;	-- STA R0, @3  	--ARMAZENA O VALOR 3 NA POSICAO 3
+25 : LDI & 00 & '0' & 04;	-- LDI R0, $4 	--CARREGA O R0 COM O VALOR 4
+26 : STA & 00 & '0' & 04;	-- STA R0, @4  	--ARMAZENA O VALOR 4 NA POSICAO 4
+27 : LDI & 00 & '0' & 06;	-- LDI R0, $6 	--CARREGA O R0 COM O VALOR 6
+28 : STA & 00 & '0' & 06;	-- STA R0, @6  	--ARMAZENA O VALOR 6 NA POSICAO 6
+29 : LDI & 00 & '0' & 0A;	-- LDI R0, $10 	--CARREGA O R0 COM O VALOR 10
+30 : STA & 00 & '0' & 0A;	-- STA R0, @10  	--ARMAZENA O VALOR 10 NA POSICAO 10
+31 : NOP & 00 & '0' & 00;	-- !INICIO
+32 : LDA & 01 & '1' & 42;	-- LDA R1, @322 	--CARREGA O VALOR DE SW9
+33 : CEQ & 01 & '0' & 00;	-- CEQ R1, @0 	--COMPARA COM 0  
+34 : JEQ & 00 & '0' & 24;	-- JEQ @LOOP
+35 : JSR & 00 & '0' & A0;	-- JSR @SET
+36 : NOP & 00 & '0' & 00;	-- !LOOP 
+37 : LDA & 01 & '0' & 00;	-- LDA R1, @0 	--CARREGA O VALOR 0 NO R1
+38 : STA & 01 & '1' & 02;	-- STA R1, @258 	--DESLIGA O LEDR9
+39 : LDA & 00 & '1' & 7F;	-- LDA R0, @383 	--CARREGA O VALOR DE CLOCK 
+40 : CEQ & 00 & '0' & 00;	-- CEQ R0, @0 	--COMPARA COM 0
+41 : JEQ & 00 & '0' & 1F;	-- JEQ @INICIO
+42 : JSR & 00 & '0' & 2D;	-- JSR @AUMENTAUNISEG
+43 : JSR & 00 & '0' & 8F;	-- JSR @DISPLAY
+44 : JMP & 00 & '0' & 1F;	-- JMP @INICIO
+45 : NOP & 00 & '0' & 00;	-- !AUMENTAUNISEG
+46 : STA & 00 & '1' & FC;	-- STA R0, @508
+47 : LDA & 00 & '0' & 3A;	-- LDA R0, @58 	--CARREGA UNIDADE SEGUNDOS
+48 : SOMA & 00 & '0' & 01;	-- SOMA R0, @1 	--SOMA 1 
+49 : CEQ & 00 & '0' & 0A;	-- CEQ R0, @10 	--COMPARA COM 10
+50 : JEQ & 00 & '0' & 35;	-- JEQ @AUMENTAMDEZSEG
+51 : STA & 00 & '0' & 3A;	-- STA R0, @58 	--COPIA PARA UNIDADE SEGUNDOS
+52 : RET & 00 & '0' & 00;	-- RET
+53 : NOP & 00 & '0' & 00;	-- !AUMENTAMDEZSEG
+54 : LDA & 00 & '0' & 00;	-- LDA R0, @0 	--CARREGA O R0 COM O VALOR 0
+55 : STA & 00 & '0' & 3A;	-- STA R0, @58  
+56 : LDA & 00 & '0' & 3B;	-- LDA R0, @59 	--CARREGA DEZENA SEGUNDOS
+57 : SOMA & 00 & '0' & 01;	-- SOMA R0, @1 	--SOMA 1
+58 : CEQ & 00 & '0' & 06;	-- CEQ R0, @6 	--COMPARA COM 6
+59 : JEQ & 00 & '0' & 3E;	-- JEQ @AUMENTAUNIMIN
+60 : STA & 00 & '0' & 3B;	-- STA R0, @59 	--COPIA PARA DEZENA SEGUNDOS
+61 : RET & 00 & '0' & 00;	-- RET
+62 : NOP & 00 & '0' & 00;	-- !AUMENTAUNIMIN
+63 : LDA & 01 & '0' & 01;	-- LDA R1, @1 	--CARREGA O VALOR 1 NO R1
+64 : STA & 01 & '1' & 00;	-- STA R1, @256 	--LIGA OS LED 1
+65 : LDA & 00 & '0' & 00;	-- LDA R0, @0 	--CARREGA O R0 COM O VALOR 0
+66 : STA & 00 & '0' & 3B;	-- STA R0, @59 	--LIMPA DEZENA SEGUNDOS
+67 : NOP & 00 & '0' & 00;	-- !PULA2
+68 : LDA & 00 & '0' & 3C;	-- LDA R0, @60 	--CARREGA UNIDADE MINUTOS
+69 : SOMA & 00 & '0' & 01;	-- SOMA R0, @1 	--SOMA 1
+70 : CEQ & 00 & '0' & 0A;	-- CEQ R0, @10 	--COMPARA COM 10
+71 : JEQ & 00 & '0' & 4D;	-- JEQ @AUMENTAMDEZMIN
+72 : STA & 00 & '0' & 3C;	-- STA R0, @60 	--COPIA PARA UNIDADE MINUTOS
+73 : LDA & 10 & '1' & 61;	-- LDA R2, @353 	--CARREGA O VALOR DE K1
+74 : CEQ & 10 & '0' & 01;	-- CEQ R2, @1 	--COMPARA COM 1
+75 : JEQ & 00 & '0' & 8F;	-- JEQ @DISPLAY
+76 : RET & 00 & '0' & 00;	-- RET
+77 : NOP & 00 & '0' & 00;	-- !AUMENTAMDEZMIN
+78 : LDA & 00 & '0' & 00;	-- LDA R0, @0 	--CARREGA O R0 COM O VALOR 0
+79 : STA & 00 & '0' & 3C;	-- STA R0, @60 	--LIMPA UNIDADE MINUTOS
+80 : LDA & 00 & '1' & 61;	-- LDA R0, @353 	--CARREGA O R0 COM O VALOR K1
+81 : CEQ & 00 & '0' & 01;	-- CEQ R0, @1 	--COMPARA COM 1
+82 : JEQ & 00 & '0' & 43;	-- JEQ @PULA2
+83 : LDA & 00 & '0' & 3D;	-- LDA R0, @61 	--CARREGA DEZENA MINUTOS
+84 : SOMA & 00 & '0' & 01;	-- SOMA R0, @1 	--SOMA 1
+85 : CEQ & 00 & '0' & 06;	-- CEQ R0, @6 	--COMPARA COM 6
+86 : JEQ & 00 & '0' & 5C;	-- JEQ @AUMENTAMUNIHOR
+87 : STA & 00 & '0' & 3D;	-- STA R0, @61 	--COPIA PARA DEZENA MINUTOS
+88 : LDA & 10 & '1' & 61;	-- LDA R2, @353 	--CARREGA O VALOR DE K1
+89 : CEQ & 10 & '0' & 01;	-- CEQ R2, @1 	--COMPARA COM 1
+90 : JEQ & 00 & '0' & 8F;	-- JEQ @DISPLAY
+91 : RET & 00 & '0' & 00;	-- RET
+92 : NOP & 00 & '0' & 00;	-- !AUMENTAMUNIHOR
+93 : LDA & 10 & '1' & 60;	-- LDA R2, @352 	--CARREGA O VALOR DE K0
+94 : CEQ & 10 & '0' & 01;	-- CEQ R2, @1 	--COMPARA COM 1
+95 : JEQ & 00 & '0' & 62;	-- JEQ @PULA
+96 : LDA & 00 & '0' & 00;	-- LDA R0, @0 	--CARREGA O R0 COM O VALOR 0
+97 : STA & 00 & '0' & 3D;	-- STA R0, @61 	--LIMPA DEZENA MINUTOS
+98 : NOP & 00 & '0' & 00;	-- !PULA
+99 : LDA & 00 & '0' & 3E;	-- LDA R0, @62 	--CARREGA UNIDADE HORAS
+100 : SOMA & 00 & '0' & 01;	-- SOMA R0, @1 	--SOMA 1
+101 : LDA & 10 & '0' & 3F;	-- LDA R2, @63 	--CARREGA DEZENA HORAS
+102 : CEQ & 10 & '0' & 02;	-- CEQ R2, @2 	--COMPARA COM 2
+103 : JEQ & 00 & '0' & 6F;	-- JEQ @CHECK2
+104 : CEQ & 00 & '0' & 0A;	-- CEQ R0, @10 	--COMPARA COM 10
+105 : JEQ & 00 & '0' & 77;	-- JEQ @AUMENTAMDEZHOR
+106 : STA & 00 & '0' & 3E;	-- STA R0, @62 	--COPIA PARA UNIDADE HORAS
+107 : LDA & 10 & '1' & 60;	-- LDA R2, @352 	--CARREGA O VALOR DE K0
+108 : CEQ & 10 & '0' & 01;	-- CEQ R2, @1 	--COMPARA COM 1
+109 : JEQ & 00 & '0' & 8F;	-- JEQ @DISPLAY
+110 : RET & 00 & '0' & 00;	-- RET
+111 : NOP & 00 & '0' & 00;	-- !CHECK2
+112 : CEQ & 00 & '0' & 04;	-- CEQ R0, @4 	--COMPARA COM 4
+113 : JEQ & 00 & '0' & 83;	-- JEQ @NEWDAY
+114 : STA & 00 & '0' & 3E;	-- STA R0, @62
+115 : LDA & 10 & '1' & 60;	-- LDA R2, @352 	--CARREGA O VALOR DE K0
+116 : CEQ & 10 & '0' & 01;	-- CEQ R2, @1 	--COMPARA COM 1
+117 : JEQ & 00 & '0' & 8F;	-- JEQ @DISPLAY
+118 : RET & 00 & '0' & 00;	-- RET
+119 : NOP & 00 & '0' & 00;	-- !AUMENTAMDEZHOR
+120 : LDA & 00 & '0' & 00;	-- LDA R0, @0 	--CARREGA O R0 COM O VALOR 0
+121 : STA & 00 & '0' & 3E;	-- STA R0, @62 	--LIMPA UNIDADE HORAS
+122 : LDA & 00 & '0' & 3F;	-- LDA R0, @63 	--CARREGA DEZENA HORAS
+123 : SOMA & 00 & '0' & 01;	-- SOMA R0, @1 	--SOMA 1
+124 : CEQ & 00 & '0' & 03;	-- CEQ R0, @3 	--COMPARA COM 3
+125 : JEQ & 00 & '0' & 83;	-- JEQ @NEWDAY
+126 : STA & 00 & '0' & 3F;	-- STA R0, @63 	--COPIA PARA DEZENA HORAS
+127 : LDA & 10 & '1' & 60;	-- LDA R2, @352 	--CARREGA O VALOR DE K0
+128 : CEQ & 10 & '0' & 01;	-- CEQ R2, @1 	--COMPARA COM 1
+129 : JEQ & 00 & '0' & 8F;	-- JEQ @DISPLAY
+130 : RET & 00 & '0' & 00;	-- RET
+131 : NOP & 00 & '0' & 00;	-- !NEWDAY 
+132 : LDA & 10 & '1' & 42;	-- LDA R2, @322 	--CARREGA O VALOR DE K0
+133 : CEQ & 10 & '0' & 01;	-- CEQ R2, @1 	--COMPARA COM 1
+134 : JEQ & 00 & '0' & A3;	-- JEQ @ZERAHORA
+135 : LDA & 00 & '0' & 00;	-- LDA R0, @0 	--CARREGA O R0 COM O VALOR 0
+136 : STA & 00 & '0' & 3A;	-- STA R0, @58  	--LIMPA UNIDADE SEGUNDOS
+137 : STA & 00 & '0' & 3B;	-- STA R0, @59 	--LIMPA DEZENA SEGUNDOS
+138 : STA & 00 & '0' & 3C;	-- STA R0, @60 	--LIMPA UNIDADE MINUTOS
+139 : STA & 00 & '0' & 3D;	-- STA R0, @61 	--LIMPA DEZENA MINUTOS
+140 : STA & 00 & '0' & 3E;	-- STA R0, @62 	--LIMPA UNIDADE HORAS
+141 : STA & 00 & '0' & 3F;	-- STA R0, @63 	--LIMPA DEZENA HORAS
+142 : RET  & 00 & '0' & 00;	-- RET 
+143 : NOP & 00 & '0' & 00;	-- !DISPLAY 
+144 : LDA & 10 & '0' & 3A;	-- LDA R2, @58 	--CARREGA UNIDADE SEGUNDOS
+145 : STA & 10 & '1' & 20;	-- STA R2, @288 	--COPIA PARA H0
+146 : LDA & 10 & '0' & 3B;	-- LDA R2, @59 	--CARREGA DEZENA SEGUNDOS
+147 : STA & 10 & '1' & 21;	-- STA R2, @289 	--COPIA PARA H1
+148 : LDA & 10 & '0' & 3C;	-- LDA R2, @60 	--CARREGA UNIDADE MINUTOS
+149 : STA & 10 & '1' & 22;	-- STA R2, @290 	--COPIA PARA H2
+150 : LDA & 10 & '0' & 3D;	-- LDA R2, @61 	--CARREGA DEZENA MINUTOS
+151 : STA & 10 & '1' & 23;	-- STA R2, @291 	--COPIA PARA H3
+152 : LDA & 10 & '0' & 3E;	-- LDA R2, @62 	--CARREGA UNIDADE HORAS
+153 : STA & 10 & '1' & 24;	-- STA R2, @292 	--COPIA PARA H4
+154 : LDA & 10 & '0' & 3F;	-- LDA R2, @63 	--CARREGA DEZENA HORAS
+155 : STA & 10 & '1' & 25;	-- STA R2, @293 	--COPIA PARA H5
+156 : LDA & 01 & '1' & 42;	-- LDA R1, @322 	--CARREGA O VALOR DE SW9	
+157 : CEQ & 01 & '0' & 01;	-- CEQ R1, @1 	--COMPARA COM 1
+158 : JEQ & 00 & '0' & A0;	-- JEQ @SET
+159 : RET & 00 & '0' & 00;	-- RET
+160 : NOP & 00 & '0' & 00;	-- !SET
+161 : STA & 00 & '1' & FF;	-- STA R0, @511 	--LIMPA K0
+162 : STA & 00 & '1' & FE;	-- STA R0, @510 	--LIMPA K1
+163 : NOP & 00 & '0' & 00;	-- !HORA
+164 : LDA & 10 & '0' & 01;	-- LDA R2, @1 	--CARREGA O R0 COM O VALOR 1
+165 : STA & 10 & '1' & 02;	-- STA R2, @258 	--ACENDE LED
+166 : LDA & 01 & '1' & 60;	-- LDA R1, @352 	--CARREGA O VALOR DE K0
+167 : CEQ & 01 & '0' & 01;	-- CEQ R1, @1 	--COMPARA COM 1
+168 : JEQ & 00 & '0' & 5C;	-- JEQ @AUMENTAMUNIHOR
+169 : LDA & 10 & '1' & 61;	-- LDA R2, @353 	--CARREGA O VALOR DE K1
+170 : CEQ & 10 & '0' & 01;	-- CEQ R2, @1 	--COMPARA COM 1
+171 : JEQ & 00 & '0' & 3E;	-- JEQ @AUMENTAUNIMIN
+172 : LDA & 11 & '1' & 42;	-- LDA R3, @322 	--CARREGA O VALOR DE SW9
+173 : CEQ & 11 & '0' & 01;	-- CEQ R3, @1 	--COMPARA COM 1
+174 : JEQ & 00 & '0' & A3;	-- JEQ @HORA
+175 : RET & 00 & '0' & 00;	-- RET
+176 : NOP & 00 & '0' & 00;	-- !ZERAHORA
+177 : LDA & 01 & '0' & 01;	-- LDA R1, @1 	--CARREGA O VALOR 0 NO R1
+178 : STA & 01 & '1' & 01;	-- STA R1, @257 	--LIGA O LEDR8
+179 : LDA & 00 & '0' & 00;	-- LDA R0, @0 	--CARREGA O R0 COM O VALOR 0
+180 : STA & 00 & '0' & 3E;	-- STA R0, @62 	--LIMPA UNIDADE HORAS
+181 : STA & 00 & '0' & 3F;	-- STA R0, @63 	--LIMPA DEZENA HORAS
+182 : JMP & 00 & '0' & 8F;	-- JMP @DISPLAY
 END;
